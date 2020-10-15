@@ -99,27 +99,33 @@ public:
   RegId rd() {return m_rd;};
   Word imm() {return m_imm;};
   InsnId insn() {return m_insn;};
-}
+};
 
 
 class Hart
 {
-
+  RegVal m_reg[kRegFileSize];
+  RegId m_pc;
+  Memory* m_mem;
 
 public:
+
+  Memory* mem();
   void run();
-}
+};
 
 
 class Memory
 {
-
-}
+public:
+  bool read(Word* result, ...);
+  bool write(Word wrd, ...);
+};
 
 class BasicBlock
 {
-
-}
+  //??
+};
 
 void Hart::run()
 {
@@ -143,4 +149,16 @@ void Hart::run()
 
 typedef void(InsnExecutor*)(Hart* hart, const Instruction& insn);
 
-InsnExecutor
+void add(Hart* hart, const Instruction& insn);
+void sub(Hart* hart, const Instruction& insn);
+
+InsnExecutor exec
+{
+  add,
+  sub,
+  xor,
+  or,
+  lb,
+  lh,
+  ...
+};
