@@ -1,10 +1,10 @@
 #include <cstdio>
 #include <iostream>
+#include <vector>
 
 typedef Word uint_32_t;
 typedef RegVal uint32_t;
 typedef RegId uint8_t;
-typedef InsnId; //а какой тип??
 
 static constexpr kRegFileSize = 32; //не понял, зачем именно так объявлять, еще на занятии прогуглил и так и не понял :D
 static constexpr kWordSize = 4;
@@ -19,7 +19,26 @@ template<> Word SignExtend(Word wrd)
   //не понял, как эта тема работает, как у вас было тоже вспомнить на смог :(
 }
 
-//идею класса Instruction ID с енумом я чет тоже не уловил, поэтому пока не добавил его
+enum InsnId
+{
+  kAdd,
+  kSub,
+  kLb,
+  kLh,
+  kLw,
+  kLbu,
+  kLhu,
+  kSb,
+  kSh,
+  kSw,
+  kBeq,
+  kBne,
+  kBlt,
+  kBge,
+  kBltu,
+  kBgeu,
+  kInvalidId
+};
 
 class Instruction
 {
@@ -27,7 +46,8 @@ class Instruction
   RegId m_rs2 {};
   RegId m_rd {};
   Word m_imm {};
-  InsnId m_insn {};
+  InsnId m_insn {kInvalidId};
+  bool m_branch {};
 
 public:
   bool Decode(Word wrd)
@@ -94,18 +114,20 @@ public:
     }
   }
 
-  RegId rs1() {return m_rs1;};
-  RegId rs2() {return m_rs2;};
-  RegId rd() {return m_rd;};
-  Word imm() {return m_imm;};
-  InsnId insn() {return m_insn;};
+  RegId rs1() {return m_rs1;}
+  RegId rs2() {return m_rs2;}
+  RegId rd() {return m_rd;}
+  Word imm() {return m_imm;}
+  InsnId insn() {return m_insn;}
+  bool branch() {return m_branch;}
 };
 
 
 class Hart
 {
-  RegVal m_reg[kRegFileSize];
-  RegId m_pc;
+  RegVal m_reg[kRegFileSize] {};
+  RegVal m_pc {};
+  RegVal m_nextpc {};
   Memory* m_mem;
 
 public:
@@ -117,6 +139,7 @@ public:
 
 class Memory
 {
+
 public:
   bool read(Word* result, ...);
   bool write(Word wrd, ...);
@@ -124,7 +147,7 @@ public:
 
 class BasicBlock
 {
-  //??
+  //?? не разобрался в анордеред мэп
 };
 
 void Hart::run()
@@ -142,23 +165,19 @@ void Hart::run()
 
       Instruction insn;
 
-
+      //....
     }
   }
 }
 
-typedef void(InsnExecutor*)(Hart* hart, const Instruction& insn);
-
-void add(Hart* hart, const Instruction& insn);
-void sub(Hart* hart, const Instruction& insn);
-
-InsnExecutor exec
-{
+void(*InsnExecutor[])(Hart* hart, const Instruction& insn) = {
   add,
   sub,
   xor,
   or,
   lb,
   lh,
-  ...
-};
+  ...};
+
+void add(Hart* hart, const Instruction& insn);
+void sub(Hart* hart, const Instruction& insn);
